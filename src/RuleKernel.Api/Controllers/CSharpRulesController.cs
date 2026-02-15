@@ -35,12 +35,14 @@ public class CSharpRulesController : ControllerBase
         var tenantExists = await _db.Tenants.AnyAsync(t => t.Id == tenantId, cancellationToken);
         if (!tenantExists) return NotFound("Tenant não encontrado");
 
+        var definitionExists = await _db.RuleDefinitions.AnyAsync(d => d.Id == request.RuleDefinitionId, cancellationToken);
+        if (!definitionExists) return NotFound("Tipo de regra não encontrado");
+
         var rule = new Rule
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            Name = request.Name,
-            Description = request.Description,
+            RuleDefinitionId = request.RuleDefinitionId,
             SourceCode = request.SourceCode,
             Priority = request.Priority,
             IsActive = request.IsActive
@@ -58,8 +60,10 @@ public class CSharpRulesController : ControllerBase
         var rule = await _db.Rules.FirstOrDefaultAsync(r => r.TenantId == tenantId && r.Id == ruleId, cancellationToken);
         if (rule is null) return NotFound();
 
-        rule.Name = request.Name;
-        rule.Description = request.Description;
+        var definitionExists = await _db.RuleDefinitions.AnyAsync(d => d.Id == request.RuleDefinitionId, cancellationToken);
+        if (!definitionExists) return NotFound("Tipo de regra não encontrado");
+
+        rule.RuleDefinitionId = request.RuleDefinitionId;
         rule.SourceCode = request.SourceCode;
         rule.Priority = request.Priority;
         rule.IsActive = request.IsActive;
@@ -83,10 +87,17 @@ public class CSharpRulesController : ControllerBase
 
         if (rule is null) return NotFound("Regra não encontrada");
 
-        await _executor.ExecuteAsync(tenant.Name, rule.SourceCode, cancellationToken);
+        await _executor.ExecuteAsync(rule.SourceCode, cancellationToken);
         return Ok(new { Executed = true, ruleId });
+    }
+
+    [HttpPost("{ruleId:guid}/executarRegra")]
+    public async Task<IActionResult> ExecuteRegra(Guid tenantId, Guid ruleId, CancellationToken cancellationToken, [FromServices]CalcularService service)
+    {
+        var result = await service.CalcularDataDeVencimentoAsync(cancellationToken);
+        return Ok(new { Executed = true, ruleId, Data = result.ToShortDateString() });
     }
 }
 
-public record CreateCSharpRuleRequest(string Name, string Description, string SourceCode, int Priority, bool IsActive = true);
-public record UpdateCSharpRuleRequest(string Name, string Description, string SourceCode, int Priority, bool IsActive);
+public record CreateCSharpRuleRequest(Guid RuleDefinitionId, string SourceCode, int Priority, bool IsActive = true);
+public record UpdateCSharpRuleRequest(Guid RuleDefinitionId, string SourceCode, int Priority, bool IsActive);

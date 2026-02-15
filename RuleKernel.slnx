@@ -1,3 +1,4 @@
 <Solution>
-  <Project Path="RuleKernel.csproj" />
+  <Project Path="src/RuleKernel.Api/RuleKernel.Api.csproj" />
+  <Project Path="src/RuleKernel.Core/RuleKernel.Core.csproj" Id="44fd2767-7dde-485c-b915-1591fee9ce94" />
 </Solution>

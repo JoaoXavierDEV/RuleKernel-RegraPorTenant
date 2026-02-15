@@ -8,6 +8,8 @@ builder.Services.AddDbContext<RuleKernelDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ConsoleScriptRuleExecutor>();
+builder.Services.AddScoped<IRuleRunner, RuleRunner>();
+builder.Services.AddScoped<CalcularService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -28,3 +30,16 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+/* 
+TODO criar contracts de regras
+DataDeVencimentoContract
+InDataDeCredito
+OutDataVencimento
+
+TaxaDeJurosContract
+InValorPrincipal
+InDataDeCredito
+OutValorComJuros
+
+*/
