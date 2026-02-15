@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using RuleKernel.Data;
-using RuleKernel.Services;
+using RuleKernel.Api.Services;
+using RuleKernel.Core.Data;
+using RuleKernel.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

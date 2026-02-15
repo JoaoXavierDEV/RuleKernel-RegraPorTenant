@@ -1,22 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RuleKernel.Data;
-using RuleKernel.Models;
-using RuleKernel.Services;
+using RuleKernel.Api.Services;
+using RuleKernel.Core.Data;
+using RuleKernel.Core.Models;
+using RuleKernel.Core.Services;
 
-namespace RuleKernel.Controllers;
+namespace RuleKernel.Api.Controllers;
 
 [ApiController]
 [Route("api/tenants/{tenantId:guid}/rules-csharp")]
 public class CSharpRulesController : ControllerBase
 {
     private readonly RuleKernelDbContext _db;
-    private readonly ConsoleScriptRuleExecutor _executor;
+    private readonly IRuleRunner _ruleRunner;
 
-    public CSharpRulesController(RuleKernelDbContext db, ConsoleScriptRuleExecutor executor)
+    public CSharpRulesController(RuleKernelDbContext db, IRuleRunner ruleRunner)
     {
         _db = db;
-        _executor = executor;
+        _ruleRunner = ruleRunner;
     }
 
     [HttpGet]
@@ -83,11 +84,17 @@ public class CSharpRulesController : ControllerBase
 
         var rule = await _db.Rules
             .AsNoTracking()
+            .Include(r => r.RuleDefinition)
             .FirstOrDefaultAsync(r => r.TenantId == tenantId && r.Id == ruleId && r.IsActive, cancellationToken);
 
         if (rule is null) return NotFound("Regra não encontrada");
 
-        await _executor.ExecuteAsync(rule.SourceCode, cancellationToken);
+        if (string.IsNullOrWhiteSpace(rule.RuleDefinition?.Name))
+        {
+            return Problem("RuleDefinition não carregada para execução.");
+        }
+
+        await _ruleRunner.ExecutarRegra(rule.RuleDefinition.Name, new { Tenant = tenant }, cancellationToken);
         return Ok(new { Executed = true, ruleId });
     }
 

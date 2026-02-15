@@ -1,4 +1,7 @@
-﻿namespace RuleKernel.Services;
+﻿using RuleKernel.Core.Contract;
+using RuleKernel.Core.Services;
+
+namespace RuleKernel.Api.Services;
 
 public sealed class CalcularService
 {
@@ -11,7 +14,7 @@ public sealed class CalcularService
 
     public async Task<DateTime> CalcularDataDeVencimentoAsync(CancellationToken cancellationToken = default)
     {
-        var contrato = new RuleKernel.Contract.DataDeVencimentoContract
+        var contrato = new DataDeVencimentoContract
         {
             InDataDeCredito = DateTime.Now
         };

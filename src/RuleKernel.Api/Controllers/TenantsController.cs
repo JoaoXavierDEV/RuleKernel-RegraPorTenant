@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RuleKernel.Data;
-using RuleKernel.Models;
+using RuleKernel.Core.Data;
+using RuleKernel.Core.Models;
 
-namespace RuleKernel.Controllers;
+namespace RuleKernel.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

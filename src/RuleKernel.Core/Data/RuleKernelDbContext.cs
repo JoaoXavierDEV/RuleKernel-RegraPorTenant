@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using RuleKernel.Models;
+using RuleKernel.Core.Models;
 
-namespace RuleKernel.Data;
+namespace RuleKernel.Core.Data;
 
-public class RuleKernelDbContext : DbContext
+public sealed class RuleKernelDbContext : DbContext
 {
     private static readonly Guid TenantSalomeId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     private static readonly Guid TenantRonyId = Guid.Parse("22222222-2222-2222-2222-222222222222");
@@ -41,14 +41,14 @@ public class RuleKernelDbContext : DbContext
             entity.HasIndex(r => new { r.TenantId, r.RuleDefinitionId, r.Priority }).IsUnique();
 
             entity.HasOne(r => r.Tenant)
-                  .WithMany(t => t.Rules)
-                  .HasForeignKey(r => r.TenantId)
-                  .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(t => t.Rules)
+                .HasForeignKey(r => r.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(r => r.RuleDefinition)
-                  .WithMany()
-                  .HasForeignKey(r => r.RuleDefinitionId)
-                  .OnDelete(DeleteBehavior.Restrict);
+                .WithMany()
+                .HasForeignKey(r => r.RuleDefinitionId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<RuleDefinition>(entity =>

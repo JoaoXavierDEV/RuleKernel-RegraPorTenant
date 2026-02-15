@@ -1,9 +1,8 @@
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
-namespace RuleKernel.Services;
+namespace RuleKernel.Core.Services;
 
 public sealed class ConsoleScriptRuleExecutor
 {
@@ -63,8 +62,8 @@ public sealed class ConsoleScriptRuleExecutor
                 "System",
                 "System.Threading",
                 "System.Threading.Tasks",
-                "RuleKernel.Services",
-                "RuleKernel.Contract");
+                "RuleKernel.Core.Services",
+                "RuleKernel.Core.Contract");
     }
 
     public sealed class ScriptGlobals<TContract>

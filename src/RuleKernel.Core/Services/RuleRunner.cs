@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using RuleKernel.Data;
-using RuleKernel.Contract;
+using RuleKernel.Core.Contract;
+using RuleKernel.Core.Data;
 
-namespace RuleKernel.Services;
+namespace RuleKernel.Core.Services;
 
 public interface IRuleRunner
 {
