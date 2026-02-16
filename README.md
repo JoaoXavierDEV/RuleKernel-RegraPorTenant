@@ -1,3 +1,4 @@
+
 # RuleKernel
 
 ## Execução de regras C# (ambiente do script)
@@ -36,3 +37,19 @@ O executor cria as opções do script em `CreateScriptOptions()`, definindo:
   - `System.Threading.Tasks`
   - `RuleKernel.Services`
   - `RuleKernel.Contract`
+
+### Exemplo Prático
+```csharp
+public async Task<DateTime> CalcularDataDeVencimentoAsync(CancellationToken cancellationToken = default)
+{
+    var contrato = new DataDeVencimentoContract
+    {
+        InDataDeEmissao = DateTime.Now
+    };        
+        
+    // regra pode ser associada ao tenant
+    await _ruleRunner.ExecutarRegra("SALOME_DataDeVencimento", contrato, cancellationToken);
+
+    return contrato.OutResult;
+}
+```
