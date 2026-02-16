@@ -44,11 +44,12 @@ public sealed class FaturaService
 
 
         await _ruleRunner.ExecutarRegra(tenant.RegraDataVencimento.RuleDefinition!.Name, vencimentoContract, cancellationToken);
-        fatura.DataDeVencimento = vencimentoContract.OutResult;
+        fatura.DataDeVencimento = vencimentoContract.OutDataVencimento;
+        descontoContract.InDataVencimento = vencimentoContract.OutDataVencimento;
 
         await _ruleRunner.ExecutarRegra(tenant.RegraCalculoDesconto.RuleDefinition!.Name, descontoContract, cancellationToken);
-        fatura.Desconto = descontoContract.OutDesconto;
-        fatura.ValorTotal = descontoContract.OutValorTotal;
+        fatura.Desconto = descontoContract.OutPercentualDesconto;
+        fatura.ValorTotal = descontoContract.OutResult;
         // TODO verificar diferenças de valores e logar se necessário
 
         return fatura;
@@ -57,7 +58,6 @@ public sealed class FaturaService
     public async Task<Fatura> EmitirFaturaAsync(
         Guid tenantId,
         decimal valorPrincipal,
-        DateTime dataDeCredito,
         DateTime? dataDeEmissao = null,
         CancellationToken cancellationToken = default)
     {
@@ -83,8 +83,6 @@ public sealed class FaturaService
             InFaturaId = fatura.Id,
             InDataDeEmissao = fatura.DataDeEmissao,
             InValorPrincipal = fatura.ValorPrincipal,
-            InPercentualTaxaAdministracao = 0m,
-            InPercentualDesconto = 0m,
         };
 
         await CalcularAsync(fatura, vencimentoContract, descontoContract, cancellationToken);

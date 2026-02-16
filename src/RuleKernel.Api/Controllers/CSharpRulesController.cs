@@ -26,8 +26,45 @@ public class CSharpRulesController : ControllerBase
         return await _db.Rules
             .AsNoTracking()
             .Where(r => r.TenantId == tenantId)
+            .Include(r => r.RuleDefinition)
             .OrderBy(r => r.Priority)
             .ToListAsync(cancellationToken);
+    }
+
+    [HttpGet("/api/rules-csharp")]
+    public async Task<ActionResult<List<Rule>>> GetAllTenants(CancellationToken cancellationToken)
+    {
+        return await _db.Rules
+            .AsNoTracking()
+            .Include(r => r.RuleDefinition)
+            .OrderBy(r => r.Priority)
+            .Select(x => new Rule
+            {
+                Id = x.Id,
+                IsActive = x.IsActive,
+                                RuleDefinitionId = x.RuleDefinitionId,
+                                Priority = x.Priority,
+                                 RuleDefinition = x.RuleDefinition,
+                                 SourceCode = x.SourceCode.Replace("                                    ", "").ToString().Replace("\n0m;", "0m;"),
+                                 Tenant = x.Tenant,
+                                 TenantId = x.TenantId
+            })
+            .ToListAsync(cancellationToken);
+    }
+
+    [HttpGet("/api/rules-csharp-stream")]
+    public async IAsyncEnumerable<Rule> GetAllTenantsStream([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await foreach (var rule in _db.Rules
+            .AsNoTracking()
+            .Include(r => r.RuleDefinition)
+            .OrderBy(r => r.Priority)
+            .AsAsyncEnumerable()
+            .WithCancellation(cancellationToken))
+        {
+            yield return rule;
+            await Task.Delay(1000);
+        }
     }
 
     [HttpPost]

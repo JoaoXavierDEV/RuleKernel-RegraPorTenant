@@ -6,7 +6,7 @@ namespace RuleKernel.Regras.Test;
 
 public sealed class ConsoleScriptRuleExecutorSourceCodeTests
 {
-    public sealed class TestContract : IRuleContract<int>
+    public sealed class TestContract : IRuleContract
     {
         public int InValor { get; init; }
         public bool OutErro { get; set; }

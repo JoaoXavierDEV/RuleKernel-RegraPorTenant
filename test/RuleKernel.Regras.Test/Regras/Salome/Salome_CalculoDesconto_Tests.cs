@@ -49,14 +49,11 @@ public sealed class Salome_CalculoDesconto_Tests
             InFaturaId = Guid.NewGuid(),
             InDataDeEmissao = new DateTime(2026, 1, 10),
             InValorPrincipal = 1500m,
-            InPercentualTaxaAdministracao = 0m,
-            InPercentualDesconto = 0m,
         };
 
         await runner.ExecutarRegra("SALOME_CalculoDesconto", contrato);
 
-        Assert.Equal(75m, contrato.OutDesconto);
-        Assert.Equal(1425m, contrato.OutValorTotal);
+        Assert.Equal(75m, contrato.OutPercentualDesconto);
         Assert.Equal(1425m, contrato.OutResult);
     }
 }

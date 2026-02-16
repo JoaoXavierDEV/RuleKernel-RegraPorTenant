@@ -10,13 +10,9 @@ public interface IRuleRunner
         where TContract : class;
 
     Task ExecutarRegra(string ruleName, object contract, CancellationToken cancellationToken = default);
-
-    Task<TContract> Execute<TContract, TResult>(string ruleName, TContract contract, CancellationToken cancellationToken = default)
-        where TContract : class, IRuleContract<TResult>;
 }
 
-public sealed class RuleRunner
-    : IRuleRunner
+public sealed class RuleRunner : IRuleRunner
 {
     private readonly RuleKernelDbContext _db;
     private readonly ConsoleScriptRuleExecutor _executor;
@@ -30,14 +26,6 @@ public sealed class RuleRunner
     public Task ExecutarRegra<TContract>(string ruleName, TContract contract, CancellationToken cancellationToken = default)
         where TContract : class
         => ExecutarRegra(ruleName, contract, typeof(TContract), cancellationToken);
-
-    public async Task<TContract> Execute<TContract, TResult>(string ruleName, TContract contract, CancellationToken cancellationToken = default)
-        where TContract : class, IRuleContract<TResult>
-    {
-        if (contract is null) throw new ArgumentNullException(nameof(contract));
-        await ExecutarRegra(ruleName, contract, typeof(TContract), cancellationToken);
-        return contract;
-    }
 
     public Task ExecutarRegra(string ruleName, object contract, CancellationToken cancellationToken = default)
     {

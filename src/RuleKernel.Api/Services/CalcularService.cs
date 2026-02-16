@@ -26,18 +26,18 @@ public sealed class CalcularService
         if (usuario is null)
             throw new InvalidOperationException($"Tenant não encontrado/ativo: '{tenantId}'.");
 
-        if (usuario.RegraDataVencimento?.RuleDefinition?.Name is not null)
+        if (usuario.RegraDataVencimento?.RuleDefinition?.Name is null)
             throw new InvalidOperationException("Tenant sem RegraDataVencimento associada.");
 
         var contrato = new DataDeVencimentoContract
         {
-            InDataDeEmissao = DateTime.Now
+            InDataDeEmissao = DateTime.UtcNow.Date
         };         
 
         await _ruleRunner.ExecutarRegra(usuario.RegraDataVencimento!.RuleDefinition!.Name, contrato, cancellationToken);
 
-        Console.WriteLine(contrato.OutResult);
+        Console.WriteLine(contrato.OutDataVencimento);
 
-        return contrato.OutResult;
+        return contrato.OutDataVencimento;
     }
 }

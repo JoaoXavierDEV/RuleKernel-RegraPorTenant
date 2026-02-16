@@ -46,6 +46,6 @@ public sealed class Salome_DataDeVencimento_Tests
         var contrato = new DataDeVencimentoContract { InDataDeEmissao = new DateTime(2026, 1, 10) };
         await runner.ExecutarRegra("SALOME_DataDeVencimento", contrato);
 
-        Assert.Equal(new DateTime(2026, 1, 17), contrato.OutResult);
+        Assert.Equal(new DateTime(2026, 1, 17), contrato.OutDataVencimento);
     }
 }

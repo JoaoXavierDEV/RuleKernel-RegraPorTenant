@@ -3,6 +3,7 @@
     <File Path=".editorconfig" />
     <File Path="README.md" />
   </Folder>
+  <Project Path="BlazorApp1/BlazorApp1.csproj" Id="f7c1907d-145d-403d-830d-1868d83ad617" />
   <Project Path="src/RuleKernel.Api/RuleKernel.Api.csproj" />
   <Project Path="src/RuleKernel.Core/RuleKernel.Core.csproj" Id="44fd2767-7dde-485c-b915-1591fee9ce94" />
   <Project Path="test/RuleKernel.Regras.Test/RuleKernel.Regras.Test.csproj" Id="e7115ca2-3cbd-4a7e-8358-ede177e1c018" />

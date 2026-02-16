@@ -95,8 +95,8 @@ public sealed class RuleKernelDbContext : DbContext
                     RuleDefinitionId = RuleDefinitionSalomeDataDeVencimentoId,
                     Priority = 1,
                     IsActive = true,
-                    SourceCode = @$"contract.OutResult = contract.InDataDeEmissao.Date.AddDays(7);
-                                    Console.WriteLine(""SALOME_DataDeVencimento""); ",
+                    SourceCode = @$"contract.OutDataVencimento = contract.InDataDeEmissao.Date.AddDays(7);
+                                    Console.WriteLine(""SALOME_DataDeVencimento"");",
                 },
                 new Rule
                 {
@@ -105,8 +105,8 @@ public sealed class RuleKernelDbContext : DbContext
                     RuleDefinitionId = RuleDefinitionRonyDataDeVencimentoId,
                     Priority = 1,
                     IsActive = true,
-                    SourceCode = @$"contract.OutResult = contract.InDataDeEmissao.Date.AddDays(10);
-                                    Console.WriteLine(""RONY_DataDeVencimento""); ",
+                    SourceCode = @$"contract.OutDataVencimento = contract.InDataDeEmissao.Date.AddDays(10);
+                                    Console.WriteLine(""RONY_DataDeVencimento"");",
                 },
                 new Rule
                 {
@@ -115,12 +115,11 @@ public sealed class RuleKernelDbContext : DbContext
                     RuleDefinitionId = RuleDefinitionSalomeCalculoDescontoId,
                     Priority = 1,
                     IsActive = true,
-                    SourceCode = @$"contract.OutDesconto = contract.InValorPrincipal >= 1000m 
+                    SourceCode = @$"contract.OutPercentualDesconto = contract.InValorPrincipal >= 1000m 
                                     ? contract.InValorPrincipal * 0.05m : 
                                     0m;
-                                    contract.OutValorTotal = contract.InValorPrincipal - contract.OutDesconto;
-                                    contract.OutResult = contract.OutValorTotal;
-                                    Console.WriteLine(""SALOME_CalculoDesconto""); ",
+                                    contract.OutResult = contract.InValorPrincipal - contract.OutPercentualDesconto;
+                                    Console.WriteLine(""SALOME_CalculoDesconto"");",
                 },
                 new Rule
                 {
@@ -129,10 +128,9 @@ public sealed class RuleKernelDbContext : DbContext
                     RuleDefinitionId = RuleDefinitionRonyCalculoDescontoId,
                     Priority = 1,
                     IsActive = true,
-                    SourceCode = @$"contract.OutDesconto = 0m;
-                                    contract.OutValorTotal = contract.InValorPrincipal;
-                                    contract.OutResult = contract.OutValorTotal;
-                                    Console.WriteLine(""RONY_CalculoDesconto"");    ",
+                    SourceCode = @$"contract.OutPercentualDesconto = 0m;
+                                    contract.OutResult = contract.InValorPrincipal;
+                                    Console.WriteLine(""RONY_CalculoDesconto"");",
                 });
         });
 

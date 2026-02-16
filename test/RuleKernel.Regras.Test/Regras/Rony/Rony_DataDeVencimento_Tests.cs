@@ -46,6 +46,6 @@ public sealed class Rony_DataDeVencimento_Tests
         var contrato = new DataDeVencimentoContract { InDataDeEmissao = new DateTime(2026, 1, 10) };
         await runner.ExecutarRegra("RONY_DataDeVencimento", contrato);
 
-        Assert.Equal(new DateTime(2026, 1, 20), contrato.OutResult);
+        Assert.Equal(new DateTime(2026, 1, 20), contrato.OutDataVencimento);
     }
 }

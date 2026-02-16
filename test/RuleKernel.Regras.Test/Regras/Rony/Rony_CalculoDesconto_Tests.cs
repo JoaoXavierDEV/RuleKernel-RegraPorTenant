@@ -49,14 +49,11 @@ public sealed class Rony_CalculoDesconto_Tests
             InFaturaId = Guid.NewGuid(),
             InDataDeEmissao = new DateTime(2026, 1, 10),
             InValorPrincipal = 1500m,
-            InPercentualTaxaAdministracao = 0m,
-            InPercentualDesconto = 0m,
         };
 
         await runner.ExecutarRegra("RONY_CalculoDesconto", contrato);
 
-        Assert.Equal(0m, contrato.OutDesconto);
-        Assert.Equal(1500m, contrato.OutValorTotal);
+        Assert.Equal(0m, contrato.OutPercentualDesconto);
         Assert.Equal(1500m, contrato.OutResult);
     }
 }

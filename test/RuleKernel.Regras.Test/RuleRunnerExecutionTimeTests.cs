@@ -3,7 +3,6 @@ using RuleKernel.Core.Contract;
 using RuleKernel.Core.Data;
 using RuleKernel.Core.Models;
 using RuleKernel.Core.Services;
-using Xunit;
 
 namespace RuleKernel.Regras.Test;
 
@@ -145,8 +144,7 @@ public sealed class RuleRunnerExecutionTimeTests
             InFaturaId = Guid.NewGuid(),
             InDataDeEmissao = new DateTime(2026, 1, 10),
             InValorPrincipal = 1500m,
-            InPercentualTaxaAdministracao = 0m,
-            InPercentualDesconto = 0m,
+
         };
         await runner.ExecutarRegra("SALOME_CalculoDesconto", descA);
 
@@ -159,18 +157,16 @@ public sealed class RuleRunnerExecutionTimeTests
             InFaturaId = Guid.NewGuid(),
             InDataDeEmissao = new DateTime(2026, 1, 10),
             InValorPrincipal = 1500m,
-            InPercentualTaxaAdministracao = 0m,
-            InPercentualDesconto = 0m,
+
         };
         await runner.ExecutarRegra("RONY_CalculoDesconto", descB);
 
         var fim = DateTime.UtcNow;
         var duracao = fim - inicio;
 
-        Assert.Equal(new DateTime(2026, 1, 17), vencA.OutResult);
-        Assert.Equal(new DateTime(2026, 1, 20), vencB.OutResult);
-        Assert.Equal(1425m, descA.OutValorTotal);
-        Assert.Equal(1500m, descB.OutValorTotal);
+        Assert.Equal(new DateTime(2026, 1, 17), vencA.OutDataVencimento);
+        Assert.Equal(new DateTime(2026, 1, 20), vencB.OutDataVencimento);
+
         Assert.True(duracao.TotalMilliseconds >= 10);
     }
 }

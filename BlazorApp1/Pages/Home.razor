@@ -1,0 +1,358 @@
+﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp1.Services
+@inject RuleProvider RuleProvider
+@inject FaturaClient FaturaClient
+
+<PageTitle>Home</PageTitle>
+
+<div class="home-grid">
+    <div class="rules-preview" aria-label="Pré-visualização de regras">
+        @if (_isLoadingRules)
+        {
+            <div class="rule-card" aria-busy="true">
+                <div class="rule-card__title">Carregando...</div>
+                <div class="rule-card__code">Aguarde</div>
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_rulesError))
+        {
+            <div class="rule-card">
+                <div class="rule-card__title">Erro ao carregar regras</div>
+                <div class="rule-card__code">@_rulesError</div>
+            </div>
+        }
+        else if (_rules.Count == 0)
+        {
+            <div class="rule-card">
+                <div class="rule-card__title">Nenhuma regra</div>
+                <div class="rule-card__code">Informe um tenantID válido</div>
+            </div>
+        }
+        else
+        {
+            @foreach (var rule in _rules)
+            {
+                <div class="rule-card">
+                    <div class="rule-card__title">@rule.RuleDefinitionName</div>
+                    <div class="rule-card__code">
+                        <pre class="codeblock"><code class="language-csharp">@rule.SourceCode</code></pre>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="emitir-row">
+        <div class="emitir">
+            <h1 class="emitir__title">Emitir fatura</h1>
+
+            <div class="emitir__field">
+                <label class="emitir__label" for="tenantId">Informe o código (tenantID)</label>
+                <input id="tenantId"
+                       class="form-control tenant-guid"
+                       inputmode="text"
+                       autocomplete="on"
+                       autocapitalize="off"
+                       spellcheck="false"
+                       maxlength="36"
+                       pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+                       placeholder="00000000-0000-0000-0000-000000000000"
+                       value="@_tenantIdText"
+                       @oninput="OnTenantIdInput" />
+            </div>
+
+            <div class="emitir__field">
+                <label class="emitir__label" for="regraVencimento">Regra para data de vencimento</label>
+                <select id="regraVencimento" class="form-select" aria-label="Selecionar regra de vencimento" @bind="_selectedVencimentoRuleId">
+                    <option value="">Selecione...</option>
+                    @foreach (var r in _vencimentoRules)
+                    {
+                        <option value="@r.Id">@r.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="emitir__field">
+                <label class="emitir__label" for="regraDesconto">Regra para Cálculo de Desconto</label>
+                <select id="regraDesconto" class="form-select" aria-label="Selecionar regra de desconto" @bind="_selectedDescontoRuleId">
+                    <option value="">Selecione...</option>
+                    @foreach (var r in _descontoRules)
+                    {
+                        <option value="@r.Id">@r.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="emitir__field">
+                <label class="emitir__label" for="valorFatura">Valor da fatura</label>
+                <input id="valorFatura"
+                       class="form-control"
+                       inputmode="decimal"
+                       autocomplete="off"
+                       placeholder="R$ 0,00"
+                       value="@_valorFaturaText"
+                       @oninput="OnValorFaturaInput"
+                       @onblur="OnValorFaturaBlur" />
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(_emitirError))
+        {
+            <div class="alert alert-danger">@_emitirError</div>
+        }
+        else if (_fatura is not null)
+        {
+            <div class="emitir-result" aria-label="Resultado da emissão">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Fatura gerada com sucesso!</h5>
+                        <dl class="row mb-0">
+                            <dt class="col-6">Id</dt>
+                            <dd class="col-6 text-end">@_fatura.Id</dd>
+
+                            <dt class="col-6">Emissão</dt>
+                            <dd class="col-6 text-end">@_fatura.DataDeEmissao.ToString("yyyy-MM-dd")</dd>
+
+                            <dt class="col-6">Vencimento</dt>
+                            <dd class="col-6 text-end">@_fatura.DataDeVencimento.ToString("yyyy-MM-dd")</dd>
+
+                            <dt class="col-6">Valor principal</dt>
+                            <dd class="col-6 text-end">@_fatura.ValorPrincipal.ToString("N2")</dd>
+
+                            <dt class="col-6">Desconto</dt>
+                            <dd class="col-6 text-end">@_fatura.Desconto.ToString("N2")</dd>
+
+                            <dt class="col-6">Total</dt>
+                            <dd class="col-6 text-end fw-semibold">@_fatura.ValorTotal.ToString("N2")</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="emitir-actions">
+        <button type="button"
+                class="btn btn-primary emitir-actions__button"
+                disabled="@_isEmitting"
+                @onclick="EmitirFaturaAsync">
+            @(_isEmitting ? "Emitindo..." : "Emitir Fatura")
+        </button>
+    </div>
+</div>
+
+@code {
+    private const string DataDeVencimentoContractType = "RuleKernel.Core.Contract.DataDeVencimentoContract";
+    private const string CalculoDescontoContractType = "RuleKernel.Core.Contract.CalculoDescontoContract";
+
+    private string _tenantIdText = string.Empty;
+    private bool _isLoadingRules;
+    private string? _rulesError;
+    private List<RuleVm> _rules = [];
+
+    private List<RuleOptionVm> _vencimentoRules = [];
+    private List<RuleOptionVm> _descontoRules = [];
+    private string? _selectedVencimentoRuleId;
+    private string? _selectedDescontoRuleId;
+
+    private decimal _valorFatura;
+    private string _valorFaturaText = string.Empty;
+    private bool _isEmitting;
+    private string? _emitirError;
+    private RuleKernel.Core.Models.Fatura? _fatura;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRulesAsync();
+        UpdateValorFaturaText();
+    }
+
+    private async Task LoadRulesAsync()
+    {
+        _rulesError = null;
+        _rules.Clear();
+        _vencimentoRules.Clear();
+        _descontoRules.Clear();
+
+        _isLoadingRules = true;
+        try
+        {
+            var items = await RuleProvider.GetAllAsync();
+
+            _rules = items!
+                .Where(r => r.IsActive)
+                .OrderBy(r => r.Priority)
+                .Select(r => new RuleVm(
+                    RuleDefinitionName: r.RuleDefinition?.Name ?? "(sem definição)",
+                    SourceCode: r.SourceCode ?? string.Empty))
+                .ToList();
+
+            _vencimentoRules = items
+                .Where(r => r.IsActive && string.Equals(r.RuleDefinition?.ContractType, DataDeVencimentoContractType, StringComparison.Ordinal))
+                .OrderBy(r => r.Priority)
+                .Select(r => new RuleOptionVm(r.Id.ToString(), r.RuleDefinition?.Name ?? r.Id.ToString()))
+                .ToList();
+
+            _descontoRules = items
+                .Where(r => r.IsActive && string.Equals(r.RuleDefinition?.ContractType, CalculoDescontoContractType, StringComparison.Ordinal))
+                .OrderBy(r => r.Priority)
+                .Select(r => new RuleOptionVm(r.Id.ToString(), r.RuleDefinition?.Name ?? r.Id.ToString()))
+                .ToList();
+
+            _selectedVencimentoRuleId ??= _vencimentoRules.FirstOrDefault()?.Id;
+            _selectedDescontoRuleId ??= _descontoRules.FirstOrDefault()?.Id;
+        }
+        catch (Exception ex)
+        {
+            _rulesError = ex.Message;
+        }
+        finally
+        {
+            _isLoadingRules = false;
+        }
+    }
+
+    private async Task EmitirFaturaAsync()
+    {
+        _emitirError = null;
+        _fatura = null;
+
+        // garante que o valor digitado foi convertido
+        if (!TryParseBrlCurrency(_valorFaturaText, out _valorFatura))
+        {
+            _emitirError = "Informe um valor de fatura v\u00e1lido (ex.: R$ 1.234,56).";
+            return;
+        }
+
+        if (!Guid.TryParse(_tenantIdText, out var tenantId))
+        {
+            _emitirError = "Informe um tenantID v\u00e1lido.";
+            return;
+        }
+
+        if (_valorFatura <= 0)
+        {
+            _emitirError = "Informe um valor de fatura maior que zero.";
+            return;
+        }
+
+        if (!Guid.TryParse(_selectedVencimentoRuleId, out var regraVencimentoId))
+        {
+            _emitirError = "Selecione uma regra de vencimento.";
+            return;
+        }
+
+        if (!Guid.TryParse(_selectedDescontoRuleId, out var regraDescontoId))
+        {
+            _emitirError = "Selecione uma regra de desconto.";
+            return;
+        }
+
+        _isEmitting = true;
+        try
+        {
+            _fatura = await FaturaClient.EmitirPorRegrasAsync(tenantId, regraVencimentoId, regraDescontoId, _valorFatura);
+        }
+        catch (HttpRequestException ex)
+        {
+            _emitirError = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            _emitirError = ex.Message;
+        }
+        finally
+        {
+            _isEmitting = false;
+        }
+    }
+
+    private void OnTenantIdInput(ChangeEventArgs e)
+    {
+        var input = e.Value?.ToString() ?? string.Empty;
+        _tenantIdText = FormatGuidLike(input);
+    }
+
+    private void OnValorFaturaInput(ChangeEventArgs e)
+    {
+        _valorFaturaText = e.Value?.ToString() ?? string.Empty;
+
+        if (TryParseBrlCurrency(_valorFaturaText, out var valor))
+            _valorFatura = valor;
+    }
+
+    private void OnValorFaturaBlur()
+    {
+        UpdateValorFaturaText();
+    }
+
+    private void UpdateValorFaturaText()
+    {
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+        _valorFaturaText = _valorFatura.ToString("C", culture);
+    }
+
+    private static bool TryParseBrlCurrency(string text, out decimal value)
+    {
+        value = 0m;
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
+
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+        var cleaned = text.Trim();
+        cleaned = cleaned.Replace("R$", "", StringComparison.OrdinalIgnoreCase).Trim();
+
+        return decimal.TryParse(
+            cleaned,
+            System.Globalization.NumberStyles.Number |
+            System.Globalization.NumberStyles.AllowCurrencySymbol,
+            culture,
+            out value);
+    }
+
+    private static string FormatGuidLike(string value)
+    {
+        Span<char> buffer = stackalloc char[32];
+        var hexCount = 0;
+
+        foreach (var ch in value)
+        {
+            if (hexCount >= 32) break;
+
+            if ((ch >= '0' && ch <= '9') ||
+                (ch >= 'a' && ch <= 'f') ||
+                (ch >= 'A' && ch <= 'F'))
+            {
+                buffer[hexCount++] = char.ToLowerInvariant(ch);
+            }
+        }
+
+        if (hexCount == 0) return string.Empty;
+
+        var dashCount = (hexCount > 8 ? 1 : 0)
+            + (hexCount > 12 ? 1 : 0)
+            + (hexCount > 16 ? 1 : 0)
+            + (hexCount > 20 ? 1 : 0);
+
+        var resultLength = Math.Min(36, hexCount + dashCount);
+        Span<char> result = stackalloc char[resultLength];
+
+        var ri = 0;
+        for (var i = 0; i < hexCount && ri < result.Length; i++)
+        {
+            if (i == 8 || i == 12 || i == 16 || i == 20)
+            {
+                if (ri < result.Length) result[ri++] = '-';
+            }
+
+            if (ri < result.Length) result[ri++] = buffer[i];
+        }
+
+        return new string(result[..ri]);
+    }
+
+    private sealed record RuleVm(string RuleDefinitionName, string SourceCode);
+
+    private sealed record RuleOptionVm(string Id, string Name);
+}
