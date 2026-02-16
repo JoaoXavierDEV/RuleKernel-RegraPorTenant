@@ -53,3 +53,28 @@ public async Task<DateTime> CalcularDataDeVencimentoAsync(CancellationToken canc
     return contrato.OutResult;
 }
 ```
+
+```csharp
+public async Task<DateTime> CalcularDataDeVencimentoAsync(Guid tenantId)
+{
+    var usuario = await _db.Tenants
+        .Include(t => t.RegraDataVencimento)!
+            .ThenInclude(r => r!.RuleDefinition)
+        .FirstOrDefaultAsync(t => t.Id == tenantId && t.IsActive);
+
+    if (usuario is null)
+        throw new InvalidOperationException($"Tenant não encontrado/ativo: '{tenantId}'.");
+
+    if (usuario.RegraDataVencimento?.RuleDefinition?.Name is null)
+        throw new InvalidOperationException("Tenant sem RegraDataVencimento associada.");
+
+    var contrato = new DataDeVencimentoContract
+    {
+        InDataDeEmissao = DateTime.Now
+    };         
+
+    await _ruleRunner.ExecutarRegra(usuario.RegraDataVencimento!.RuleDefinition!.Name, contrato);
+
+    return contrato.OutResult;
+}
+```

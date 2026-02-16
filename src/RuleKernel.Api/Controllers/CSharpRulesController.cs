@@ -101,7 +101,7 @@ public class CSharpRulesController : ControllerBase
     [HttpPost("{ruleId:guid}/executarRegra")]
     public async Task<IActionResult> ExecuteRegra(Guid tenantId, Guid ruleId, CancellationToken cancellationToken, [FromServices]CalcularService service)
     {
-        var result = await service.CalcularDataDeVencimentoAsync(cancellationToken);
+        var result = await service.CalcularDataDeVencimentoAsync(tenantId, cancellationToken);
         return Ok(new { Executed = true, ruleId, Data = result.ToShortDateString() });
     }
 }
