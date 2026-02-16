@@ -16,17 +16,10 @@ public sealed class CalcularService
     {
         var contrato = new DataDeVencimentoContract
         {
-            InDataDeCredito = DateTime.Now
-        };
-        //contrato.OutResult = contrato.InDataDeCredito.AddDays(7);
-        /*
-         corpo da regra
+            InDataDeEmissao = DateTime.Now
+        };         
 
-        
-        */
-         
-
-        await _ruleRunner.ExecutarRegra("SLM_DataVencimento", contrato, cancellationToken);
+        await _ruleRunner.ExecutarRegra("SALOME_DataDeVencimento", contrato, cancellationToken);
 
         Console.WriteLine(contrato.OutResult);
 

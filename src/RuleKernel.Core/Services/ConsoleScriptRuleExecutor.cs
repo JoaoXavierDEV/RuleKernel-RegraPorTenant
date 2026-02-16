@@ -4,9 +4,10 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace RuleKernel.Core.Services;
 
+
 public sealed class ConsoleScriptRuleExecutor
 {
-    internal Task ExecuteAsync(string source, object? contract, CancellationToken cancellationToken = default)
+    public Task ExecuteAsync(string source, object? contract, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(source))
         {
@@ -64,19 +65,6 @@ public sealed class ConsoleScriptRuleExecutor
                 "System.Threading.Tasks",
                 "RuleKernel.Core.Services",
                 "RuleKernel.Core.Contract");
-    }
-
-    public sealed class ScriptGlobals<TContract>
-    {
-        public ScriptGlobals(RegraBaseHost host, TContract contract)
-        {
-            this.host = host;
-            this.contract = contract;
-        }
-
-        // Nomes intencionais para uso direto no script.
-        public RegraBaseHost host { get; }
-        public TContract contract { get; }
     }
 
     public sealed class RegraBaseHost : RegraBase

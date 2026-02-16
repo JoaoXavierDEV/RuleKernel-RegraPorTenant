@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RuleKernel.Core.Models;
 using RuleKernel.Api.Services;
 using RuleKernel.Core.Data;
 using RuleKernel.Core.Services;
@@ -11,6 +12,7 @@ builder.Services.AddDbContext<RuleKernelDbContext>(options =>
 builder.Services.AddScoped<ConsoleScriptRuleExecutor>();
 builder.Services.AddScoped<IRuleRunner, RuleRunner>();
 builder.Services.AddScoped<CalcularService>();
+builder.Services.AddScoped<FaturaService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -31,16 +33,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-/* 
-TODO criar contracts de regras
-DataDeVencimentoContract
-InDataDeCredito
-OutDataVencimento
-
-TaxaDeJurosContract
-InValorPrincipal
-InDataDeCredito
-OutValorComJuros
-
-*/

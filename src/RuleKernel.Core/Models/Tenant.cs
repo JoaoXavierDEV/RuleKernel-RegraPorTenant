@@ -8,7 +8,13 @@ public sealed class Tenant
 
     public bool IsActive { get; set; }
 
+    public Guid? RegraDataVencimentoId { get; set; }
+    public Rule? RegraDataVencimento { get; set; } 
+
+    public Guid? RegraCalculoDescontoId { get; set; }
+    public Rule? RegraCalculoDesconto { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
-    public ICollection<Rule> Rules { get; set; } = new List<Rule>();
+    public ICollection<Fatura> Faturas { get; set; } = new List<Fatura>();
 }
