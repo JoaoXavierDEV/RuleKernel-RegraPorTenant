@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\RuleKernel.Core\RuleKernel.Core.csproj" />
+    <ProjectReference Include="..\RuleKernel.Core\RuleKernel.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

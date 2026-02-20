@@ -111,11 +111,8 @@
                             <dt class="col-6">Id</dt>
                             <dd class="col-6 text-end">@_fatura.Id</dd>
 
-                            <dt class="col-6">Emissão</dt>
-                            <dd class="col-6 text-end">@_fatura.DataDeEmissao.ToString("yyyy-MM-dd")</dd>
-
                             <dt class="col-6">Vencimento</dt>
-                            <dd class="col-6 text-end">@_fatura.DataDeVencimento.ToString("yyyy-MM-dd")</dd>
+                            <dd class="col-6 text-end">@_fatura.DataDeVencimento.ToString("dd 'de' MMMM 'de' yyyy")</dd>
 
                             <dt class="col-6">Valor principal</dt>
                             <dd class="col-6 text-end">@_fatura.ValorPrincipal.ToString("N2")</dd>

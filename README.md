@@ -1,6 +1,24 @@
 
 # RuleKernel
 
+## Execução do teste (API + Blazor WebAssembly)
+
+Há uma API e um Blazor WebAssembly que faz `GET` na API para buscar as regras. Para o teste, ambos devem ser executados juntos.
+
+Pré-requisito: `.NET 10` instalado.
+
+1. Iniciar a API:
+   - `dotnet run --project src/RuleKernel.Api`
+2. Iniciar o Blazor WebAssembly:
+   - `dotnet run --project src/BlazorApp1`
+
+### Executar no Visual Studio
+
+1. Abrir a solução no Visual Studio.
+2. Em **Configuração de Inicialização**, selecionar **Vários projetos de inicialização**.
+3. Definir `RuleKernel.Api` e `BlazorApp1` como **Iniciar**.
+4. Pressionar **F5**.
+
 ## Execução de regras C# (ambiente do script)
 
 As regras são executadas como **C# Script** (Roslyn Scripting) em runtime, pela classe `ConsoleScriptRuleExecutor`.

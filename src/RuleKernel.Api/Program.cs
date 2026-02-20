@@ -8,7 +8,7 @@ using RuleKernel.Core.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<RuleKernelDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ConsoleScriptRuleExecutor>();
 builder.Services.AddScoped<IRuleRunner, RuleRunner>();
